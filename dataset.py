@@ -58,8 +58,10 @@ class listDataset(Dataset):
                 patch = img.crop((dx,dy,crop_size[0]+dx,crop_size[1]+dy))
                 patch = self.toTensor(patch)
                 
+                print(np.shape(patch))
+                print(np.shape(target[dx:crop_size[0]+dx,dy:crop_size[1]+dy])
                 img_list.append(patch)
-                target_list.append(target[dy:crop_size[1]+dy,dx:crop_size[0]+dx])
+                target_list.append(target[dx:crop_size[0]+dx,dy:crop_size[1]+dy]) #x for verticle y for horizon
                 
         
 
