@@ -39,6 +39,7 @@ class listDataset(Dataset):
         target = np.asarray(gt_file['density'])
         #make img and gt's shape can be devided by 16, for 1/2 cropped and 3 ML in module 
         img = img.crop((0,0,int(img.size[0]/16)*16,int(img.size[1]/16)*16))
+        
         tagert = target[0:img.size[1],0:img.size[0]]
 
         img_list = [] 
@@ -58,10 +59,8 @@ class listDataset(Dataset):
                 patch = img.crop((dx,dy,crop_size[0]+dx,crop_size[1]+dy))
                 patch = self.toTensor(patch)
                 
-                print(np.shape(patch))
-                print(np.shape(target[dx:crop_size[0]+dx,dy:crop_size[1]+dy])
                 img_list.append(patch)
-                target_list.append(target[dx:crop_size[0]+dx,dy:crop_size[1]+dy]) #x for verticle y for horizon
+                target_list.append(target[dy:crop_size[1]+dy,dx:crop_size[0]+dx])
                 
         
 

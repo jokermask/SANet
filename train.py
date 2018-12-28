@@ -51,7 +51,7 @@ parser.add_argument('task',metavar='TASK', type=str,
 #create log
 # localtime = time.strftime("%Y-%m-%d", time.localtime())
 # outputfile = open("./logs/record"+localtime+".txt", 'w')
-logDir = './tblogs/1219'
+logDir = './tblogs/1228'
 if os.path.exists(logDir):
     shutil.rmtree(logDir)
 writer = SummaryWriter(logDir)
@@ -176,7 +176,7 @@ def train(train_list, model, criterion, optimizer, epoch):
 
             loss = criterion(output, target)
 
-            losses.update(loss.item(), img.size(0))
+            losses.update(float(loss.item()), img.size(0))
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()    

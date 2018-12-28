@@ -29,11 +29,14 @@ class SANet(nn.Module):
 
 def mk_front_layers(cfg, in_channels = 3):
     layers = []
-    for v in cfg:
+    for i, v in enumerate(cfg):
         if v == 'M':
             layers += [nn.MaxPool2d(kernel_size=2, stride=2)]
         else:
-            layers += [conv_block(in_channels, v)]
+            if i==0:
+                layers += [conv_block(in_channels, v, isFirstLayer=True)]
+            else:
+                layers += [conv_block(in_channels, v)]
             #concat 4 branches, so mulitply with 4
             in_channels = 4*v 
     return nn.Sequential(*layers)
@@ -53,19 +56,28 @@ def mk_back_layers(cfg, in_channels):
 
 class conv_block(nn.Module):
 
-    def __init__(self, in_channels, out_channels, instance_norm=True):
+    def __init__(self, in_channels, out_channels, instance_norm=True, isFirstLayer=False,):
         super(conv_block, self).__init__()
+        
+        if isFirstLayer:
+            
+            self.branch1 = Conv2d(in_channels,out_channels,1,same_padding=True,In=instance_norm)
+            self.branch2 = Conv2d(in_channels,out_channels,3,same_padding=True,In=instance_norm)
+            self.branch3 = Conv2d(in_channels,out_channels,5,same_padding=True,In=instance_norm)
+            self.branch4 = Conv2d(in_channels,out_channels,7,same_padding=True,In=instance_norm)
+            
+        else:
+        
+            inner_channels = int(out_channels/2) #to reduce the feature dim by half
 
-        inner_channels = int(out_channels/2)
-        conv1 = Conv2d(in_channels,inner_channels,1,same_padding=True,In=instance_norm)
-
-        self.branch1 = Conv2d(in_channels,out_channels,1,same_padding=True,In=instance_norm)
-        self.branch2 = nn.Sequential(conv1,
-            Conv2d(inner_channels,out_channels,3,same_padding=True,In=instance_norm))
-        self.branch3 = nn.Sequential(conv1,
-            Conv2d(inner_channels,out_channels,5,same_padding=True,In=instance_norm))
-        self.branch4 = nn.Sequential(conv1,
-            Conv2d(inner_channels,out_channels,7,same_padding=True,In=instance_norm))
+            self.branch1 = Conv2d(in_channels,out_channels,1,same_padding=True,In=instance_norm)
+            self.branch2 = nn.Sequential(Conv2d(in_channels,inner_channels,1,same_padding=True,In=instance_norm),
+                Conv2d(inner_channels,out_channels,3,same_padding=True,In=instance_norm))
+            self.branch3 = nn.Sequential(Conv2d(in_channels,inner_channels,1,same_padding=True,In=instance_norm),
+                Conv2d(inner_channels,out_channels,5,same_padding=True,In=instance_norm))
+            self.branch4 = nn.Sequential(Conv2d(in_channels,inner_channels,1,same_padding=True,In=instance_norm),
+                Conv2d(inner_channels,out_channels,7,same_padding=True,In=instance_norm))
+        
 
     def forward(self, x):
         branch1 = self.branch1(x)
