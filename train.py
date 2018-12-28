@@ -216,7 +216,7 @@ def validate(val_list, model, criterion, epoch):
     
     for i, (img_list, target_list) in enumerate(test_loader):
         
-        patch_num = len(img_lit) 
+        patch_num = len(img_list) 
         
         for j, patch in enumerate(img_list):
             
@@ -234,7 +234,7 @@ def validate(val_list, model, criterion, epoch):
             mse += ((gt_count-et_count)*(gt_count-et_count))
         
     mae = mae/len(test_loader*patch_num)
-    mse = np.sqrt(mse/len(test_loader*patch_num))
+    mse = np.sqrt(mse/(len(test_loader)*patch_num))
     
     if epoch%2==0:
         log_text = ' * MAE {mae:.3f}--MSE {mse:.3f} '.format(mae=mae,mse=mse)
