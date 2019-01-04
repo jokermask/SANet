@@ -91,8 +91,6 @@ def main():
     
     model = model.cuda()
     
-    weights_normal_init(model)
-    
     criterion = nn.MSELoss(size_average=False).cuda()
     
     optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=0.00001)
@@ -109,7 +107,8 @@ def main():
             log_text = "=> loaded checkpoint '{}' (epoch {})".format(args.pre, checkpoint['epoch'])
             log_print(log_text, color='white', attrs=['bold'])
         else:
-            log_text = "=> no checkpoint found at '{}'".format(args.pre)
+            weights_normal_init(model)
+            log_text = "=> no checkpoint found at '{}', use default init instead".format(args.pre)
             log_print(log_text, color='white', attrs=['bold'])
             
     for epoch in range(args.start_epoch, args.epochs):

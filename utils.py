@@ -19,7 +19,7 @@ def save_checkpoint(state, is_best,task_id, epoch, filename='checkpoint.pth.tar'
         shutil.copyfile(task_id+filename, task_id+'model_best.pth.tar')   
         
 def weights_normal_init(model):
-    for m in model:
+    for m in model.modules():
         if isinstance(m, nn.Conv2d):
             nn.init.normal_(m.weight, std=0.01)
             if m.bias is not None:
