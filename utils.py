@@ -1,5 +1,6 @@
 import h5py
 import torch
+import torch.nn as nn
 import shutil
 
 def save_net(fname, net):
@@ -15,4 +16,14 @@ def load_net(fname, net):
 def save_checkpoint(state, is_best,task_id, epoch, filename='checkpoint.pth.tar'):
     torch.save(state, task_id+filename)
     if is_best:
-        shutil.copyfile(task_id+filename, task_id+'-'+epoch+'-'+'model_best.pth.tar')            
+        shutil.copyfile(task_id+filename, task_id+'model_best.pth.tar')   
+        
+def weights_normal_init(model):
+    for m in model:
+        if isinstance(m, nn.Conv2d):
+            nn.init.normal_(m.weight, std=0.01)
+            if m.bias is not None:
+                nn.init.constant_(m.bias, 0)
+        elif isinstance(m, nn.BatchNorm2d):
+            nn.init.constant_(m.weight, 1)
+            nn.init.constant_(m.bias, 0)

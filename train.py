@@ -6,7 +6,7 @@ import warnings
 
 from model import SANet
 
-from utils import save_checkpoint
+from utils import save_checkpoint, weights_normal_init
 
 import torch
 import torch.nn as nn
@@ -20,17 +20,6 @@ import cv2
 import dataset
 import time
 from tensorboardX import SummaryWriter
-
-try:
-    from termcolor import cprint
-except ImportError:
-    cprint = None
-    
-def log_print(text, color=None, on_color=None, attrs=None):
-    if cprint is not None:
-        cprint(text, color=color, on_color=on_color, attrs=attrs)
-    else:
-        print(text)
 
 parser = argparse.ArgumentParser(description='PyTorch SANet')
 
@@ -48,10 +37,22 @@ parser.add_argument('gpu',metavar='GPU', type=str,
 parser.add_argument('task',metavar='TASK', type=str,
                     help='task id to use.')
 
-#create log
-# localtime = time.strftime("%Y-%m-%d", time.localtime())
-# outputfile = open("./logs/record"+localtime+".txt", 'w')
-logDir = './tblogs/1228'
+#create log for ssh check
+localtime = time.strftime("%Y-%m-%d", time.localtime())
+outputfile = open("./logs/record"+localtime+".txt", 'w')
+try:
+    from termcolor import cprint
+except ImportError:
+    cprint = None
+    
+def log_print(text, color=None, on_color=None, attrs=None, outputfile=outputfile):
+    print(text, file=outputfile)
+    if cprint is not None:
+        cprint(text, color=color, on_color=on_color, attrs=attrs)
+    else:
+        print(text)
+#create tensorboard dir
+logDir = './tblogs/0104'
 if os.path.exists(logDir):
     shutil.rmtree(logDir)
 writer = SummaryWriter(logDir)
@@ -86,9 +87,11 @@ def main():
     torch.cuda.manual_seed(args.seed)
     
     model = SANet()
-    #print(model)
+    print(model)
     
     model = model.cuda()
+    
+    weights_normal_init(model)
     
     criterion = nn.MSELoss(size_average=False).cuda()
     
@@ -127,6 +130,8 @@ def main():
             'best_prec1': best_prec1,
             'optimizer' : optimizer.state_dict(),
         }, is_best,args.task,epoch)
+        
+    outputfile.close()
 
 def train(train_list, model, criterion, optimizer, epoch):
     
@@ -233,7 +238,7 @@ def validate(val_list, model, criterion, epoch):
             mae += abs(gt_count-et_count)
             mse += ((gt_count-et_count)*(gt_count-et_count))
         
-    mae = mae/len(test_loader*patch_num)
+    mae = mae/(len(test_loader)*patch_num)
     mse = np.sqrt(mse/(len(test_loader)*patch_num))
     
     if epoch%2==0:
