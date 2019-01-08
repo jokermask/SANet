@@ -13,10 +13,10 @@ def load_net(fname, net):
             param = torch.from_numpy(np.asarray(h5f[k]))         
             v.copy_(param)
             
-def save_checkpoint(state, is_best,task_id, epoch, filename='checkpoint.pth.tar'):
+def save_checkpoint(state, is_best,task_id, save_path, filename='checkpoint.pth.tar'):
     torch.save(state, task_id+filename)
     if is_best:
-        shutil.copyfile(task_id+filename, task_id+'model_best.pth.tar')   
+        shutil.copyfile(task_id+filename, save_path+task_id+'model_best.pth.tar')   
         
 def weights_normal_init(model):
     for m in model.modules():

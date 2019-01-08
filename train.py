@@ -77,6 +77,7 @@ def main():
     args.workers = 4
     args.seed = time.time()
     args.print_freq = 30
+    args.save_path = './best_models'
     
     with open(args.train_json, 'r') as outfile:        
         train_list = json.load(outfile)
@@ -128,7 +129,7 @@ def main():
             'state_dict': model.state_dict(),
             'best_prec1': best_prec1,
             'optimizer' : optimizer.state_dict(),
-        }, is_best,args.task,epoch)
+        }, is_best,args.task,args.save_path)
         
     outputfile.close()
 
